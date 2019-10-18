@@ -175,6 +175,7 @@ static inline void scte104t_set_gpi_edge(uint8_t *p, uint8_t i_gpi_edge)
 #define SCTE104_OPID_SPLICE             0x0101
 #define SCTE104_OPID_SPLICE_NULL        0x0102
 #define SCTE104_OPID_TIME_SIGNAL        0x0104
+#define SCTE104_OPID_INSERT_SD          0x010b
 #define SCTE104_OPID_MULTIPLE           0xffff
 
 static inline uint16_t scte104_get_opid(const uint8_t *p)
@@ -425,6 +426,7 @@ static inline bool scte104m_validate(const uint8_t *p)
  *****************************************************************************/
 #define SCTE104SRD_HEADER_SIZE          14
 
+#define SCTE104SRD_RESERVED             0
 #define SCTE104SRD_START_NORMAL         1
 #define SCTE104SRD_START_IMMEDIATE      2
 #define SCTE104SRD_END_NORMAL           3
@@ -521,6 +523,217 @@ static inline uint8_t scte104srd_get_auto_return(const uint8_t *p)
 static inline void scte104srd_set_auto_return(uint8_t *p, uint8_t i_auto_return)
 {
     p[13] = i_auto_return;
+}
+
+/*****************************************************************************
+ * 9.8.1.  time signal request AS ==> IJ
+ *****************************************************************************/
+static inline uint16_t scte104ts_get_pre_roll_time(const uint8_t *p)
+{
+    return ((uint16_t)p[0] << 8) | (uint16_t)p[1];
+}
+
+static inline void scte104ts_set_pre_roll_time(uint8_t *p, uint16_t i_pre_roll_time)
+{
+    p[0] = (i_pre_roll_time >> 8) & 0xff;
+    p[1] = (i_pre_roll_time >> 0) & 0xff;
+}
+
+
+/*****************************************************************************
+ * 9.8.7.  insert_segmentation_descriptor request   AS  ==>  IJ
+ *****************************************************************************/
+
+#define SCTE104ISD_HEADER 9
+
+static inline uint32_t scte104isd_get_segmentation_event_id(const uint8_t *p)
+{
+    return ((uint32_t)p[0] << 24) |
+           ((uint32_t)p[1] << 16) |
+           ((uint32_t)p[2] << 8) |
+           (uint32_t)p[3];
+}
+
+static inline void scte104isd_set_segmentation_event_id(uint8_t *p, uint32_t segmentation_event_id)
+{
+    p[0] = (segmentation_event_id >> 24) & 0xff;
+    p[1] = (segmentation_event_id >> 16) & 0xff;
+    p[2] = (segmentation_event_id >> 8) & 0xff;
+    p[3] = segmentation_event_id & 0xff;
+}
+
+static inline uint8_t scte104isd_get_segmentation_event_cancel_indicator(const uint8_t *p)
+{
+    return p[4];
+}
+
+static inline void scte104isd_set_segmentation_event_cancel_indicator(uint8_t *p, uint8_t segmentation_event_cancel_indicator)
+{
+    p[4] = segmentation_event_cancel_indicator;
+}
+
+static inline uint16_t scte104isd_get_duration(const uint8_t *p)
+{
+    return ((uint16_t)p[5] << 8) |
+           (uint16_t)p[6];
+}
+
+static inline void scte104isd_set_duration(uint8_t *p, uint16_t duration)
+{
+    p[5] = (duration >> 8) & 0xff;
+    p[6] = duration & 0xff;
+}
+
+static inline uint8_t scte104isd_get_segmentation_upid_type(const uint8_t *p)
+{
+    return p[7];
+}
+
+static inline void scte104isd_set_segmentation_upid_type(uint8_t *p, uint8_t segmentation_upid_type)
+{
+    p[7] = segmentation_upid_type;
+}
+
+static inline uint8_t scte104isd_get_segmentation_upid_length(const uint8_t *p)
+{
+    return p[8];
+}
+
+static inline void scte104isd_set_segmentation_upid_length(uint8_t *p, uint8_t segmentation_upid_length)
+{
+    p[8] = segmentation_upid_length;
+}
+
+static inline uint8_t *scte104isd_get_segmentation_upid(const uint8_t *p)
+{
+    return (uint8_t *)&p[9];
+}
+
+static inline void scte104isd_set_segmentation_upid(uint8_t *p, const uint8_t *segmentation_upid, uint8_t upid_length)
+{
+    memcpy(p+9, segmentation_upid, upid_length);
+}
+
+/* pointer address change */
+
+static inline uint8_t scte104isd_get_segment_type_id(const uint8_t *p)
+{
+    return p[0];
+}
+
+static inline void scte104isd_set_segment_type_id(uint8_t *p, uint8_t segment_type_id)
+{
+    p[0] = segment_type_id;
+}
+
+static inline uint8_t scte104isd_get_segment_num(const uint8_t *p)
+{
+    return p[1];
+}
+
+static inline void scte104isd_set_segment_num(uint8_t *p, uint8_t segment_num)
+{
+    p[1] = segment_num;
+}
+
+static inline uint8_t scte104isd_get_segments_expected(const uint8_t *p)
+{
+    return p[2];
+}
+
+static inline void scte104isd_set_segments_expected(uint8_t *p, uint8_t segments_expected)
+{
+    p[2] = segments_expected;
+}
+
+static inline uint8_t scte104isd_get_duration_extension_frames(const uint8_t *p)
+{
+    return p[3];
+}
+
+static inline void scte104isd_set_duration_extension_frames(uint8_t *p, uint8_t duration_extension_frames)
+{
+    p[3] = duration_extension_frames;
+}
+
+static inline uint8_t scte104isd_get_delivery_not_restricted_flag(const uint8_t *p)
+{
+    return p[4];
+}
+
+static inline void scte104isd_set_delivery_not_restricted_flag(uint8_t *p, uint8_t delivery_not_restricted_flag)
+{
+    p[4] = delivery_not_restricted_flag;
+}
+
+static inline uint8_t scte104isd_get_web_delivery_allowed_flag(const uint8_t *p)
+{
+    return p[5];
+}
+
+static inline void scte104isd_set_web_delivery_allowed_flag(uint8_t *p, uint8_t web_delivery_allowed_flag)
+{
+    p[5] = web_delivery_allowed_flag;
+}
+
+static inline uint8_t scte104isd_get_no_regional_blackout_flag(const uint8_t *p)
+{
+    return p[6];
+}
+
+static inline void scte104isd_set_no_regional_blackout_flag(uint8_t *p, uint8_t no_regional_blackout_flag)
+{
+    p[6] = no_regional_blackout_flag;
+}
+
+static inline uint8_t scte104isd_get_archive_allowed_flag(const uint8_t *p)
+{
+    return p[7];
+}
+
+static inline void scte104isd_set_archive_allowed_flag(uint8_t *p, uint8_t archive_allowed_flag)
+{
+    p[7] = archive_allowed_flag;
+}
+
+static inline uint8_t scte104isd_get_device_restrictions(const uint8_t *p)
+{
+    return p[8];
+}
+
+static inline void scte104isd_set_device_restrictions(uint8_t *p, uint8_t device_restrictions)
+{
+    p[8] = device_restrictions;
+}
+
+static inline uint8_t scte104isd_get_insert_sub_segment_info(const uint8_t *p)
+{
+    return p[9];
+}
+
+static inline void scte104isd_set_insert_sub_segment_info(uint8_t *p, uint8_t insert_sub_segment_info)
+{
+    p[9] = insert_sub_segment_info;
+}
+
+static inline uint8_t scte104isd_get_sub_segment_num(const uint8_t *p)
+{
+    return p[10];
+}
+
+static inline void scte104isd_set_sub_segment_num(uint8_t *p, uint8_t sub_segment_num)
+{
+    p[10] = sub_segment_num;
+}
+
+static inline uint8_t scte104isd_get_sub_segment_expected(const uint8_t *p)
+{
+    return p[11];
+}
+
+static inline void scte104isd_set_sub_segment_expected(uint8_t *p, uint8_t sub_segment_expected)
+{
+    p[11] = sub_segment_expected;
 }
 
 #ifdef __cplusplus
