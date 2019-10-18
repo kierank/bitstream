@@ -523,6 +523,198 @@ static inline void scte104srd_set_auto_return(uint8_t *p, uint8_t i_auto_return)
     p[13] = i_auto_return;
 }
 
+/*****************************************************************************
+ * 9.8.7.  insert_segmentation_descriptor request   AS  ==>  IJ
+ *****************************************************************************/
+
+static inline uint32_t scte104isd_get_segmentation_event_id(const uint8_t *p)
+{
+    return ((uint32_t)p[0] << 24) |
+           ((uint32_t)p[1] << 16) |
+           ((uint32_t)p[2] << 8) |
+           (uint32_t)p[3];
+}
+
+static inline void scte104isd_set_segmentation_event_id(uint8_t *p, uint32_t segmentation_event_id)
+{
+    p[0] = (segmentation_event_id >> 24) & 0xff;
+    p[1] = (segmentation_event_id >> 16) & 0xff;
+    p[2] = (segmentation_event_id >> 8) & 0xff;
+    p[3] = segmentation_event_id & 0xff;
+}
+
+static inline uint8_t scte104isd_get_segmentation_event_cancel_indicator(const uint8_t *p)
+{
+    return p[4];
+}
+
+static inline void scte104isd_set_segmentation_event_cancel_indicator(uint8_t *p, uint8_t segmentation_event_cancel_indicator)
+{
+    p[4] = segmentation_event_cancel_indicator;
+}
+
+static inline uint16_t scte104isd_get_duration(const uint8_t *p)
+{
+    return ((uint16_t)p[5] << 8) |
+           (uint16_t)p[6];
+}
+
+static inline void scte104isd_set_duration(uint8_t *p, uint16_t duration)
+{
+    p[5] = (duration >> 8) & 0xff;
+    p[6] = duration & 0xff;
+}
+
+static inline uint8_t scte104isd_get_segmentation_upid_type(const uint8_t *p)
+{
+    return p[7];
+}
+
+static inline void scte104isd_set_segmentation_upid_type(uint8_t *p, uint8_t segmentation_upid_type)
+{
+    p[7] = segmentation_upid_type;
+}
+
+static inline uint8_t scte104isd_get_segmentation_upid_length(const uint8_t *p)
+{
+    return p[8];
+}
+
+static inline void scte104isd_set_segmentation_upid_length(uint8_t *p, uint8_t segmentation_upid_length)
+{
+    p[8] = segmentation_upid_length;
+}
+
+static inline void scte104isd_get_segmentation_upid(const uint8_t *p, uint8_t segmentation_upid, uint8_t upid_length)
+{
+    memcpy(segmentation_upid, p+9, upid_length);
+}
+
+static inline void scte104isd_set_segmentation_upid(uint8_t *p, const uint8_t segmentation_upid, uint8_t upid_length)
+{
+    memcpy(p+9, segmentation_upid, upid_length);
+}
+
+static inline uint8_t scte104isd_get_segment_type_id(const uint8_t *p, uint8_t upid_length)
+{
+    return p[upid_length+9];
+}
+
+static inline void scte104isd_set_segment_type_id(uint8_t *p, uint8_t segment_type_id, uint8_t upid_length)
+{
+    p[upid_length+9] = segment_type_id;
+}
+
+static inline uint8_t scte104isd_get_segment_num(const uint8_t *p, uint8_t upid_length)
+{
+    return p[upid_length+10];
+}
+
+static inline void scte104isd_set_segment_num(uint8_t *p, uint8_t segment_num, uint8_t upid_length)
+{
+    p[upid_length+10] = segment_num;
+}
+
+static inline uint8_t scte104isd_get_segments_expected(const uint8_t *p, uint8_t upid_length)
+{
+    return p[upid_length+11];
+}
+
+static inline void scte104isd_set_segments_expected(uint8_t *p, uint8_t segments_expected, uint8_t upid_length)
+{
+    p[upid_length+11] = segments_expected;
+}
+
+static inline uint8_t scte104isd_get_duration_extension_frames(const uint8_t *p, uint8_t upid_length)
+{
+    return p[upid_length+12];
+}
+
+static inline void scte104isd_set_duration_extension_frames(uint8_t *p, uint8_t duration_extension_frames, uint8_t upid_length)
+{
+    p[upid_length+12] = duration_extension_frames;
+}
+
+static inline uint8_t scte104isd_get_delivery_not_restricted_flag(const uint8_t *p, uint8_t upid_length)
+{
+    return p[upid_length+13];
+}
+
+static inline void scte104isd_set_delivery_not_restricted_flag(uint8_t *p, uint8_t delivery_not_restricted_flag, uint8_t upid_length)
+{
+    p[upid_length+13] = delivery_not_restricted_flag;
+}
+
+static inline uint8_t scte104isd_get_web_delivery_allowed_flag(const uint8_t *p, uint8_t upid_length)
+{
+    return p[upid_length+14];
+}
+
+static inline void scte104isd_set_web_delivery_allowed_flag(uint8_t *p, uint8_t web_delivery_allowed_flag, uint8_t upid_length)
+{
+    p[upid_length+14] = web_delivery_allowed_flag;
+}
+
+static inline uint8_t scte104isd_get_no_regional_blackout_flag(const uint8_t *p, uint8_t upid_length)
+{
+    return p[upid_length+15];
+}
+
+static inline void scte104isd_set_no_regional_blackout_flag(uint8_t *p, uint8_t no_regional_blackout_flag, uint8_t upid_length)
+{
+    p[upid_length+15] = no_regional_blackout_flag;
+}
+
+static inline uint8_t scte104isd_get_archive_allowed_flag(const uint8_t *p, uint8_t upid_length)
+{
+    return p[upid_length+16];
+}
+
+static inline void scte104isd_set_archive_allowed_flag(uint8_t *p, uint8_t archive_allowed_flag, uint8_t upid_length)
+{
+    p[upid_length+16] = archive_allowed_flag;
+}
+
+static inline uint8_t scte104isd_get_device_restrictions(const uint8_t *p, uint8_t upid_length)
+{
+    return p[upid_length+17];
+}
+
+static inline void scte104isd_set_device_restrictions(uint8_t *p, uint8_t device_restrictions, uint8_t upid_length)
+{
+    p[upid_length+17] = device_restrictions;
+}
+
+static inline uint8_t scte104isd_get_insert_sub_segment_info(const uint8_t *p, uint8_t upid_length)
+{
+    return p[upid_length+18];
+}
+
+static inline void scte104isd_set_insert_sub_segment_info(uint8_t *p, uint8_t insert_sub_segment_info, uint8_t upid_length)
+{
+    p[upid_length+18] = insert_sub_segment_info;
+}
+
+static inline uint8_t scte104isd_get_sub_segment_num(const uint8_t *p, uint8_t upid_length)
+{
+    return p[upid_length+19];
+}
+
+static inline void scte104isd_set_sub_segment_num(uint8_t *p, uint8_t sub_segment_num, uint8_t upid_length)
+{
+    p[upid_length+19] = sub_segment_num;
+}
+
+static inline uint8_t scte104isd_get_sub_segment_expected(const uint8_t *p, uint8_t upid_length)
+{
+    return p[upid_length+20];
+}
+
+static inline void scte104isd_set_sub_segment_expected(uint8_t *p, uint8_t sub_segment_expected, uint8_t upid_length)
+{
+    p[upid_length+20] = sub_segment_expected;
+}
+
 #ifdef __cplusplus
 }
 #endif
