@@ -726,6 +726,313 @@ static inline bool scte35_validate(const uint8_t *p_scte35)
     return true;
 }
 
+/*****************************************************************************
+ * 10.3.3. segmentation_descriptor()
+ *****************************************************************************/
+
+#define SCTE35_SD_HEADER_SIZE 11
+#define SCTE35_SD_TAG         2
+#define SCTE35_SD_IDENTIFIER  0x43554549
+
+#define SCTE35_SD_SEGMENTATION_TYPE_PROV_START 0x34
+#define SCTE35_SD_SEGMENTATION_TYPE_DIST_START 0x36
+
+static inline void scte35sd_init(uint8_t *p)
+{
+    p[10] = 0x7f;
+}
+
+static inline uint8_t scte35sd_get_splice_descriptor_tag(const uint8_t *p)
+{
+    return p[0];
+}
+
+static inline void scte35sd_set_splice_descriptor_tag(uint8_t *p, uint8_t splice_descriptor_tag)
+{
+    p[0] = splice_descriptor_tag;
+}
+
+static inline uint8_t scte35sd_get_descriptor_length(const uint8_t *p)
+{
+    return p[1];
+}
+
+static inline void scte35sd_set_descriptor_length(uint8_t *p, uint8_t descriptor_length)
+{
+    p[1] = descriptor_length;
+}
+
+static inline uint32_t scte35sd_get_identifier(const uint8_t *p)
+{
+    return ((uint32_t)p[2] << 24) |
+           ((uint32_t)p[3] << 16) |
+           ((uint32_t)p[4] << 8) |
+           (uint32_t)p[5];
+}
+
+static inline void scte35sd_set_identifier(uint8_t *p, uint32_t identifier)
+{
+    p[2] = (identifier >> 24) & 0xff;
+    p[3] = (identifier >> 16) & 0xff;
+    p[4] = (identifier >> 8) & 0xff;
+    p[5] = identifier & 0xff;
+}
+
+static inline uint32_t scte35sd_get_segmentation_event_id(const uint8_t *p)
+{
+    return ((uint32_t)p[6] << 24) |
+           ((uint32_t)p[7] << 16) |
+           ((uint32_t)p[8] << 8) |
+           (uint32_t)p[9];
+}
+
+static inline void scte35sd_set_segmentation_event_id(uint8_t *p, uint32_t segmentation_event_id)
+{
+    p[6] = (segmentation_event_id >> 24) & 0xff;
+    p[7] = (segmentation_event_id >> 16) & 0xff;
+    p[8] = (segmentation_event_id >> 8) & 0xff;
+    p[9] = segmentation_event_id & 0xff;
+}
+
+static inline bool scte35sd_get_segmentation_event_cancel_indicator(const uint8_t *p)
+{
+    return !!(p[10] & 0x80);
+}
+
+static inline void scte35sd_set_segmentation_event_cancel_indicator(uint8_t *p, bool segmentation_event_cancel_indicator)
+{
+    if (segmentation_event_cancel_indicator)
+        p[10] |= 0x80;
+    else
+        p[10] &= ~0x80;
+}
+
+static inline bool scte35sd_get_program_segmentation_flag(const uint8_t *p)
+{
+    return !!(p[11] & 0x80);
+}
+
+static inline void scte35sd_set_program_segmentation_flag(uint8_t *p, bool program_segmentation_flag)
+{
+    if (program_segmentation_flag)
+        p[11] |= 0x80;
+    else
+        p[11] &= ~0x80;
+}
+
+static inline bool scte35sd_get_segmentation_duration_flag(const uint8_t *p)
+{
+    return !!(p[11] & 0x40);
+}
+
+static inline void scte35sd_set_segmentation_duration_flag(uint8_t *p, bool segmentation_duration_flag)
+{
+    if (segmentation_duration_flag)
+        p[11] |= 0x40;
+    else
+        p[11] &= ~0x40;
+}
+
+static inline bool scte35sd_get_delivery_not_restricted_flag(const uint8_t *p)
+{
+    return !!(p[11] & 0x20);
+}
+
+static inline void scte35sd_set_delivery_not_restricted_flag(uint8_t *p, bool delivery_not_restricted_flag)
+{
+    if (delivery_not_restricted_flag)
+        p[11] |= 0x20;
+    else
+        p[11] &= ~0x20;
+}
+
+static inline void scte35sd_init_delivery_not_restricted(uint8_t *p)
+{
+    p[11] |= 0x1f;
+}
+
+static inline bool scte35sd_get_web_delivery_allowed_flag(const uint8_t *p)
+{
+    return !!(p[11] & 0x10);
+}
+
+static inline void scte35sd_set_web_delivery_allowed_flag(uint8_t *p, bool web_delivery_allowed_flag)
+{
+    if (web_delivery_allowed_flag)
+        p[11] |= 0x10;
+    else
+        p[11] &= ~0x10;
+}
+
+static inline bool scte35sd_get_no_regional_blackout_flag(const uint8_t *p)
+{
+    return !!(p[11] & 0x08);
+}
+
+static inline void scte35sd_set_no_regional_blackout_flag(uint8_t *p, bool no_regional_blackout_flag)
+{
+    if (no_regional_blackout_flag)
+        p[11] |= 0x08;
+    else
+        p[11] &= ~0x08;
+}
+
+static inline bool scte35sd_get_archive_allowed_flag(const uint8_t *p)
+{
+    return !!(p[11] & 0x04);
+}
+
+static inline void scte35sd_set_archive_allowed_flag(uint8_t *p, bool archive_allowed_flag)
+{
+    if (archive_allowed_flag)
+        p[11] |= 0x04;
+    else
+        p[11] &= ~0x04;
+}
+
+static inline uint8_t scte35sd_get_device_restrictions(const uint8_t *p)
+{
+    return p[11] & 0x03;
+}
+
+static inline void scte35sd_set_device_restrictions(uint8_t *p, uint8_t device_restrictions)
+{
+    p[11] = (p[11] & ~0x03) | device_restrictions;
+}
+
+static inline uint8_t scte35sd_get_component_count(const uint8_t *p)
+{
+    return p[12];
+}
+
+static inline void scte35sd_set_component_count(uint8_t *p, uint8_t component_count)
+{
+    p[12] = component_count;
+}
+
+/* pointer address change */
+
+static inline uint8_t scte35sd_get_component_tag(const uint8_t *p)
+{
+    return p[0];
+}
+
+static inline void scte35sd_set_component_tag(uint8_t *p, uint8_t component_tag)
+{
+    p[0] = component_tag;
+}
+
+static inline uint64_t scte35sd_get_pts_offset(const uint8_t *p)
+{
+    return (((uint64_t)p[1] & 0x01) << 32) |
+           ((uint64_t)p[2] << 24) |
+           ((uint64_t)p[3] << 16) |
+           ((uint64_t)p[4] << 8) |
+           (uint64_t)p[5];
+}
+
+static inline void scte35sd_set_pts_offset(uint8_t *p, uint64_t pts_offset)
+{
+    p[1] |= (pts_offset >> 32) & 0x01;
+    p[2] = (pts_offset >> 24) & 0xff;
+    p[3] = (pts_offset >> 16) & 0xff;
+    p[4] = (pts_offset >> 8) & 0xff;
+    p[5] = pts_offset & 0xff;
+}
+
+/* pointer address change */
+
+static inline uint64_t scte35sd_get_segmentation_duration(const uint8_t *p)
+{
+    return ((uint64_t)p[0] << 32) |
+           ((uint64_t)p[1] << 24) |
+           ((uint64_t)p[2] << 16) |
+           ((uint64_t)p[3] << 8) |
+           (uint64_t)p[4];
+}
+
+static inline void scte35sd_set_segmentation_duration(uint8_t *p, uint64_t segmentation_duration)
+{
+    p[0] = (segmentation_duration >> 32) & 0xff;
+    p[1] = (segmentation_duration >> 24) & 0xff;
+    p[2] = (segmentation_duration >> 16) & 0xff;
+    p[3] = (segmentation_duration >> 8) & 0xff;
+    p[4] = segmentation_duration & 0xff;
+}
+
+static inline uint8_t scte35sd_get_segmentation_upid_type(const uint8_t *p)
+{
+    return p[0];
+}
+
+static inline void scte35sd_set_segmentation_upid_type(uint8_t *p, uint8_t segmentation_upid_type)
+{
+    p[0] = segmentation_upid_type;
+}
+
+static inline uint8_t scte35sd_get_segmentation_upid_length(const uint8_t *p)
+{
+    return p[1];
+}
+
+static inline void scte35sd_set_segmentation_upid_length(uint8_t *p, uint8_t segmentation_upid_length)
+{
+    p[1] = segmentation_upid_length;
+}
+
+/* segmentation_upid() */
+
+static inline uint8_t scte35sd_get_segmentation_type_id(const uint8_t *p)
+{
+    return p[0];
+}
+
+static inline void scte35sd_set_segmentation_type_id(uint8_t *p, uint8_t segmentation_type_id)
+{
+    p[0] = segmentation_type_id;
+}
+
+static inline uint8_t scte35sd_get_segment_num(const uint8_t *p)
+{
+    return p[1];
+}
+
+static inline void scte35sd_set_segment_num(uint8_t *p, uint8_t segment_num)
+{
+    p[1] = segment_num;
+}
+
+static inline uint8_t scte35sd_get_segments_expected(const uint8_t *p)
+{
+    return p[2];
+}
+
+static inline void scte35sd_set_segments_expected(uint8_t *p, uint8_t segments_expected)
+{
+    p[2] = segments_expected;
+}
+
+static inline uint8_t scte35sd_get_sub_segment_num(const uint8_t *p)
+{
+    return p[3];
+}
+
+static inline void scte35sd_set_sub_segment_num(uint8_t *p, uint8_t sub_segment_num)
+{
+    p[3] = sub_segment_num;
+}
+
+static inline uint8_t scte35sd_get_sub_segments_expected(const uint8_t *p)
+{
+    return p[4];
+}
+
+static inline void scte35sd_set_sub_segments_expected(uint8_t *p, uint8_t sub_segments_expected)
+{
+    p[4] = sub_segments_expected;
+}
+
+
 #ifdef __cplusplus
 }
 #endif
