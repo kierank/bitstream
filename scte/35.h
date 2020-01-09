@@ -893,34 +893,38 @@ static inline void scte35sd_set_component_count(uint8_t *p, uint8_t component_co
     p[12] = component_count;
 }
 
+/* pointer address change */
+
 static inline uint8_t scte35sd_get_component_tag(const uint8_t *p)
 {
-    return p[13];
+    return p[0];
 }
 
 static inline void scte35sd_set_component_tag(uint8_t *p, uint8_t component_tag)
 {
-    p[13] = component_tag;
+    p[0] = component_tag;
 }
 
 static inline uint64_t scte35sd_get_pts_offset(const uint8_t *p)
 {
-    return (((uint64_t)p[14] & 0x01) << 32) |
-           ((uint64_t)p[15] << 24) |
-           ((uint64_t)p[16] << 16) |
-           ((uint64_t)p[17] << 8) |
-           (uint64_t)p[18];
+    return (((uint64_t)p[1] & 0x01) << 32) |
+           ((uint64_t)p[2] << 24) |
+           ((uint64_t)p[3] << 16) |
+           ((uint64_t)p[4] << 8) |
+           (uint64_t)p[5];
 }
 
 static inline void scte35sd_set_pts_offset(uint8_t *p, uint64_t pts_offset)
 {
     /* TODO: keep/set reserved bits. */
-    p[14] = (segmentation_event_id >> 32) & 0x01;
-    p[15] = (segmentation_event_id >> 24) & 0xff;
-    p[16] = (segmentation_event_id >> 16) & 0xff;
-    p[17] = (segmentation_event_id >> 8) & 0xff;
-    p[18] = segmentation_event_id & 0xff;
+    p[1] = (segmentation_event_id >> 32) & 0x01;
+    p[2] = (segmentation_event_id >> 24) & 0xff;
+    p[3] = (segmentation_event_id >> 16) & 0xff;
+    p[4] = (segmentation_event_id >> 8) & 0xff;
+    p[5] = segmentation_event_id & 0xff;
 }
+
+/* pointer address change */
 
 static inline uint64_t scte35sd_get_segmentation_duration(const uint8_t *p)
 {
