@@ -525,6 +525,21 @@ static inline void scte104srd_set_auto_return(uint8_t *p, uint8_t i_auto_return)
 }
 
 /*****************************************************************************
+ * 9.8.1.  time signal request AS ==> IJ
+ *****************************************************************************/
+static inline uint16_t scte104ts_get_pre_roll_time(const uint8_t *p)
+{
+    return ((uint16_t)p[0] << 8) | (uint16_t)p[1];
+}
+
+static inline void scte104ts_set_pre_roll_time(uint8_t *p, uint16_t i_pre_roll_time)
+{
+    p[0] = (i_pre_roll_time >> 8) & 0xff;
+    p[1] = (i_pre_roll_time >> 0) & 0xff;
+}
+
+
+/*****************************************************************************
  * 9.8.7.  insert_segmentation_descriptor request   AS  ==>  IJ
  *****************************************************************************/
 
