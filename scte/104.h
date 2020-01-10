@@ -175,6 +175,7 @@ static inline void scte104t_set_gpi_edge(uint8_t *p, uint8_t i_gpi_edge)
 #define SCTE104_OPID_SPLICE             0x0101
 #define SCTE104_OPID_SPLICE_NULL        0x0102
 #define SCTE104_OPID_TIME_SIGNAL        0x0104
+#define SCTE104_OPID_INSERT_SD          0x010b
 #define SCTE104_OPID_MULTIPLE           0xffff
 
 static inline uint16_t scte104_get_opid(const uint8_t *p)
