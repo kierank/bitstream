@@ -601,12 +601,12 @@ static inline void scte104isd_set_segmentation_upid_length(uint8_t *p, uint8_t s
     p[8] = segmentation_upid_length;
 }
 
-static inline void scte104isd_get_segmentation_upid(const uint8_t *p, uint8_t segmentation_upid, uint8_t upid_length)
+static inline uint8_t *scte104isd_get_segmentation_upid(const uint8_t *p, uint8_t *segmentation_upid)
 {
-    memcpy(segmentation_upid, p+9, upid_length);
+    return &p[9];
 }
 
-static inline void scte104isd_set_segmentation_upid(uint8_t *p, const uint8_t segmentation_upid, uint8_t upid_length)
+static inline void scte104isd_set_segmentation_upid(uint8_t *p, const uint8_t *segmentation_upid, uint8_t upid_length)
 {
     memcpy(p+9, segmentation_upid, upid_length);
 }
