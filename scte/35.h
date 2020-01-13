@@ -730,6 +730,18 @@ static inline bool scte35_validate(const uint8_t *p_scte35)
  * 10.3.3. segmentation_descriptor()
  *****************************************************************************/
 
+#define SCTE35_SD_HEADER_SIZE 11
+#define SCTE35_SD_TAG         2
+#define SCTE35_SD_IDENTIFIER  0x43554549
+
+#define SCTE35_SD_SEGMENTATION_TYPE_PROV_START 0x34
+#define SCTE35_SD_SEGMENTATION_TYPE_DIST_START 0x36
+
+static inline void scte35sd_init(const uint8_t *p)
+{
+    p[10] = 0x7f;
+}
+
 static inline uint8_t scte35sd_get_splice_descriptor_tag(const uint8_t *p)
 {
     return p[0];
@@ -832,6 +844,11 @@ static inline void scte35sd_set_delivery_not_restricted_flag(uint8_t *p, bool de
         p[11] |= 0x20;
     else
         p[11] &= ~0x20;
+}
+
+static inline void scte35sd_init_delivery_not_restricted(const uint8_t *p)
+{
+    p[11] |= 0x1f;
 }
 
 static inline bool scte35sd_get_web_delivery_allowed_flag(const uint8_t *p)
