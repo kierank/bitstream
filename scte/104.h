@@ -603,7 +603,7 @@ static inline void scte104isd_set_segmentation_upid_length(uint8_t *p, uint8_t s
 
 static inline uint8_t *scte104isd_get_segmentation_upid(const uint8_t *p, uint8_t *segmentation_upid)
 {
-    return &p[9];
+    return (uint8_t *)&p[9];
 }
 
 static inline void scte104isd_set_segmentation_upid(uint8_t *p, const uint8_t *segmentation_upid, uint8_t upid_length)
