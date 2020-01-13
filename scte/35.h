@@ -1012,14 +1012,14 @@ static inline void scte35sd_set_segments_expected(uint8_t *p, uint8_t segments_e
     p[2] = segments_expected;
 }
 
-static inline uint8_t scte35sd_get_sub_segments_num(const uint8_t *p)
+static inline uint8_t scte35sd_get_sub_segment_num(const uint8_t *p)
 {
     return p[3];
 }
 
-static inline void scte35sd_set_sub_segments_num(uint8_t *p, uint8_t sub_segments_num)
+static inline void scte35sd_set_sub_segment_num(uint8_t *p, uint8_t sub_segment_num)
 {
-    p[3] = sub_segments_num;
+    p[3] = sub_segment_num;
 }
 
 static inline uint8_t scte35sd_get_sub_segments_expected(const uint8_t *p)
