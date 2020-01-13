@@ -737,7 +737,7 @@ static inline bool scte35_validate(const uint8_t *p_scte35)
 #define SCTE35_SD_SEGMENTATION_TYPE_PROV_START 0x34
 #define SCTE35_SD_SEGMENTATION_TYPE_DIST_START 0x36
 
-static inline void scte35sd_init(const uint8_t *p)
+static inline void scte35sd_init(uint8_t *p)
 {
     p[10] = 0x7f;
 }
@@ -846,7 +846,7 @@ static inline void scte35sd_set_delivery_not_restricted_flag(uint8_t *p, bool de
         p[11] &= ~0x20;
 }
 
-static inline void scte35sd_init_delivery_not_restricted(const uint8_t *p)
+static inline void scte35sd_init_delivery_not_restricted(uint8_t *p)
 {
     p[11] |= 0x1f;
 }
@@ -933,12 +933,11 @@ static inline uint64_t scte35sd_get_pts_offset(const uint8_t *p)
 
 static inline void scte35sd_set_pts_offset(uint8_t *p, uint64_t pts_offset)
 {
-    /* TODO: keep/set reserved bits. */
-    p[1] = (segmentation_event_id >> 32) & 0x01;
-    p[2] = (segmentation_event_id >> 24) & 0xff;
-    p[3] = (segmentation_event_id >> 16) & 0xff;
-    p[4] = (segmentation_event_id >> 8) & 0xff;
-    p[5] = segmentation_event_id & 0xff;
+    p[1] |= (pts_offset >> 32) & 0x01;
+    p[2] = (pts_offset >> 24) & 0xff;
+    p[3] = (pts_offset >> 16) & 0xff;
+    p[4] = (pts_offset >> 8) & 0xff;
+    p[5] = pts_offset & 0xff;
 }
 
 /* pointer address change */
@@ -954,11 +953,11 @@ static inline uint64_t scte35sd_get_segmentation_duration(const uint8_t *p)
 
 static inline void scte35sd_set_segmentation_duration(uint8_t *p, uint64_t segmentation_duration)
 {
-    p[0] = (segmentation_event_id >> 32) & 0xff;
-    p[1] = (segmentation_event_id >> 24) & 0xff;
-    p[2] = (segmentation_event_id >> 16) & 0xff;
-    p[3] = (segmentation_event_id >> 8) & 0xff;
-    p[4] = segmentation_event_id & 0xff;
+    p[0] = (segmentation_duration >> 32) & 0xff;
+    p[1] = (segmentation_duration >> 24) & 0xff;
+    p[2] = (segmentation_duration >> 16) & 0xff;
+    p[3] = (segmentation_duration >> 8) & 0xff;
+    p[4] = segmentation_duration & 0xff;
 }
 
 static inline uint8_t scte35sd_get_segmentation_upid_type(const uint8_t *p)
