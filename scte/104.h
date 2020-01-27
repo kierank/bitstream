@@ -543,6 +543,8 @@ static inline void scte104ts_set_pre_roll_time(uint8_t *p, uint16_t i_pre_roll_t
  * 9.8.7.  insert_segmentation_descriptor request   AS  ==>  IJ
  *****************************************************************************/
 
+#define SCTE104ISD_HEADER 9
+
 static inline uint32_t scte104isd_get_segmentation_event_id(const uint8_t *p)
 {
     return ((uint32_t)p[0] << 24) |
