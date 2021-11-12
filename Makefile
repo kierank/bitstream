@@ -45,6 +45,8 @@ install: bitstream.pc
 	@install -m 644 scte/*.h $(INCLUDE)/scte
 	@install -d $(INCLUDE)/smpte
 	@install -m 644 smpte/*.h $(INCLUDE)/smpte
+	@install -d $(INCLUDE)/vsf
+	@install -m 644 vsf/*.h $(INCLUDE)/vsf
 	@echo "INSTALL  $(PKGCONFIG)/bitstream.pc"
 	@install -d $(PKGCONFIG)
 	@install -m 644 bitstream.pc $(PKGCONFIG)
