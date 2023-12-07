@@ -226,7 +226,7 @@ static inline uint16_t srt_get_control_packet_type(const uint8_t *buf)
 
 static inline void srt_set_control_packet_subtype(uint8_t *buf, uint16_t subtype)
 {
-    buf[2] |= subtype >> 8;
+    buf[2] = subtype >> 8;
     buf[3] = subtype & 0xff;
 }
 
