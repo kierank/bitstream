@@ -936,7 +936,7 @@ static inline bool srt_check_dropreq(const uint8_t *cif, size_t n)
 
 static inline void srt_set_dropreq_first_seq(uint8_t *cif, uint32_t first_seq)
 {
-    cif[0] = (first_seq >> 24) & 0xff;
+    cif[0] = (first_seq >> 24) & 0x7f;
     cif[1] = (first_seq >> 16) & 0xff;
     cif[2] = (first_seq >>  8) & 0xff;
     cif[3] =  first_seq & 0xff;
@@ -944,12 +944,12 @@ static inline void srt_set_dropreq_first_seq(uint8_t *cif, uint32_t first_seq)
 
 static inline uint32_t srt_get_dropreq_first_seq(const uint8_t *cif)
 {
-    return (cif[0] << 24) | (cif[1] << 16) | (cif[2] << 8) | cif[3];
+    return ((cif[0] << 24) & 0x7f) | (cif[1] << 16) | (cif[2] << 8) | cif[3];
 }
 
 static inline void srt_set_dropreq_last_seq(uint8_t *cif, uint32_t last_seq)
 {
-    cif[4] = (last_seq >> 24) & 0xff;
+    cif[4] = (last_seq >> 24) & 0x7f;
     cif[5] = (last_seq >> 16) & 0xff;
     cif[6] = (last_seq >>  8) & 0xff;
     cif[7] =  last_seq & 0xff;
@@ -957,7 +957,7 @@ static inline void srt_set_dropreq_last_seq(uint8_t *cif, uint32_t last_seq)
 
 static inline uint32_t srt_get_dropreq_last_seq(const uint8_t *cif)
 {
-    return (cif[4] << 24) | (cif[5] << 16) | (cif[6] << 8) | cif[7];
+    return ((cif[4] << 24) & 0x7f) | (cif[5] << 16) | (cif[6] << 8) | cif[7];
 }
 
 
