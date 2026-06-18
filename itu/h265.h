@@ -142,45 +142,46 @@ static inline uint8_t h265nalst_get_type(uint8_t start)
 /*****************************************************************************
  * H265 supplemental enhancement information
  *****************************************************************************/
-#define H265SEI_HEADER_SIZE         5
+#define H265SEI_HEADER_SIZE                             5
 
-#define H265SEI_BUFFERING_PERIOD    0
-#define H265SEI_PIC_TIMING          1
-#define H265SEI_PAN_SCAN_RECT       2
-#define H265SEI_FILLER_PAYLOAD      3
-#define H265SEI_USER_T_T35          4
-#define H265SEI_USER_UNREGISTERED   5
-#define H265SEI_RECOVERY_POINT      6
-#define H265SEI_SCENE_INFO          9
-#define H265SEI_FULL_FRAME_SNAP     15
-#define H265SEI_PROG_REF_SEGMENT_S  16
-#define H265SEI_PROG_REF_SEGMENT_E  17
-#define H265SEI_FILM_GRAIN_CHAR     19
-#define H265SEI_POST_FILTER_HINT    22
-#define H265SEI_TONE_MAPPING_INFO   23
-#define H265SEI_FRAME_PACK_ARRANG   45
-#define H265SEI_DISPLAY_ORIENTATION 47
-#define H265SEI_STRUCT_PICT_INFO    128
-#define H265SEI_ACTIVE_PS           129
-#define H265SEI_DEC_UNIT_INFO       130
-#define H265SEI_TEMP_SUBL_ZERO_IDX  131
-#define H265SEI_DEC_PICTURE_HASH    132
-#define H265SEI_SCALABLE_NESTING    133
-#define H265SEI_REGION_REFRESH_INFO 134
+#define H265SEI_BUFFERING_PERIOD                        0
+#define H265SEI_PIC_TIMING                              1
+#define H265SEI_PAN_SCAN_RECT                           2
+#define H265SEI_FILLER_PAYLOAD                          3
+#define H265SEI_USER_T_T35                              4
+#define H265SEI_USER_UNREGISTERED                       5
+#define H265SEI_RECOVERY_POINT                          6
+#define H265SEI_SCENE_INFO                              9
+#define H265SEI_FULL_FRAME_SNAP                         15
+#define H265SEI_PROG_REF_SEGMENT_S                      16
+#define H265SEI_PROG_REF_SEGMENT_E                      17
+#define H265SEI_FILM_GRAIN_CHAR                         19
+#define H265SEI_POST_FILTER_HINT                        22
+#define H265SEI_TONE_MAPPING_INFO                       23
+#define H265SEI_FRAME_PACK_ARRANG                       45
+#define H265SEI_DISPLAY_ORIENTATION                     47
+#define H265SEI_STRUCT_PICT_INFO                        128
+#define H265SEI_ACTIVE_PS                               129
+#define H265SEI_DEC_UNIT_INFO                           130
+#define H265SEI_TEMP_SUBL_ZERO_IDX                      131
+#define H265SEI_DEC_PICTURE_HASH                        132
+#define H265SEI_SCALABLE_NESTING                        133
+#define H265SEI_REGION_REFRESH_INFO                     134
+#define H265SEI_ALTERNATIVE_TRANSFER_CHARACTERISTICS    147
 
-#define H265SEI_STRUCT_FRAME        0
-#define H265SEI_STRUCT_TOP          1
-#define H265SEI_STRUCT_BOT          2
-#define H265SEI_STRUCT_TOP_BOT      3
-#define H265SEI_STRUCT_BOT_TOP      4
-#define H265SEI_STRUCT_TOP_BOT_TOP  5
-#define H265SEI_STRUCT_BOT_TOP_BOT  6
-#define H265SEI_STRUCT_DOUBLE       7
-#define H265SEI_STRUCT_TRIPLE       8
-#define H265SEI_STRUCT_TOP_PREV_BOT 9
-#define H265SEI_STRUCT_BOT_PREV_TOP 10
-#define H265SEI_STRUCT_TOP_NEXT_BOT 11
-#define H265SEI_STRUCT_BOT_NEXT_TOP 12
+#define H265SEI_STRUCT_FRAME                            0
+#define H265SEI_STRUCT_TOP                              1
+#define H265SEI_STRUCT_BOT                              2
+#define H265SEI_STRUCT_TOP_BOT                          3
+#define H265SEI_STRUCT_BOT_TOP                          4
+#define H265SEI_STRUCT_TOP_BOT_TOP                      5
+#define H265SEI_STRUCT_BOT_TOP_BOT                      6
+#define H265SEI_STRUCT_DOUBLE                           7
+#define H265SEI_STRUCT_TRIPLE                           8
+#define H265SEI_STRUCT_TOP_PREV_BOT                     9
+#define H265SEI_STRUCT_BOT_PREV_TOP                     10
+#define H265SEI_STRUCT_TOP_NEXT_BOT                     11
+#define H265SEI_STRUCT_BOT_NEXT_TOP                     12
 
 static inline void h265sei_init(uint8_t *p_h265sei, bool b_prefix)
 {
@@ -232,6 +233,16 @@ static inline void h265vps_set_vps_id(uint8_t *p_h265vps, uint8_t i_vps_id)
 static inline uint8_t h265vps_get_vps_id(const uint8_t *p_h265vps)
 {
     return (p_h265vps[5] & 0xf0) >> 4;
+}
+
+static inline uint8_t h265vps_get_tier(const uint8_t *p_h265vps)
+{
+    return (p_h265vps[9] >> 5) & 1;
+}
+
+static inline uint8_t h265vps_get_level(const uint8_t *p_h265vps)
+{
+    return p_h265vps[23];
 }
 
 /*****************************************************************************
@@ -410,6 +421,89 @@ static inline void h265hvcc_set_profile_compatibility(uint8_t *p, uint32_t val)
 static inline uint32_t h265hvcc_get_profile_compatibility(const uint8_t *p)
 {
     return (p[2] << 24) | (p[3] << 16) | (p[4] << 8) | p[5];
+}
+
+static inline const char *h265_get_range_ext_profile(bool max_12bit, bool max_10bit, bool max_8bit, bool max_422chroma, bool max_420chroma, bool max_monochrome, bool intra, bool one_picture_only, bool lower_bit_rate)
+{
+    /* ITU-T H.265 (V9) Table A.2 */
+
+    union constraint {
+        struct {
+            bool max_12bit: 1;
+            bool max_10bit: 1;
+            bool max_8bit: 1;
+            bool max_422chroma: 1;
+            bool max_420chroma: 1;
+            bool max_monochrome: 1;
+            bool intra: 1;
+            bool one_picture_only: 1;
+        };
+        unsigned int constraint;
+    };
+
+    static const struct {
+        const char name[32];
+        union constraint c;
+    } profile_name[] = {
+        { "Monochrome",                     { { 1, 1, 1, 1, 1, 1, 0, 0, } }, },
+        { "Monochrome 10",                  { { 1, 1, 0, 1, 1, 1, 0, 0, } }, },
+        { "Monochrome 12",                  { { 1, 0, 0, 1, 1, 1, 0, 0, } }, },
+        { "Monochrome 16",                  { { 0, 0, 0, 1, 1, 1, 0, 0, } }, },
+        { "Main 12",                        { { 1, 0, 0, 1, 1, 0, 0, 0, } }, },
+        { "Main 4:2:2 10",                  { { 1, 1, 0, 1, 0, 0, 0, 0, } }, },
+        { "Main 4:2:2 12",                  { { 1, 0, 0, 1, 0, 0, 0, 0, } }, },
+        { "Main 4:4:4",                     { { 1, 1, 1, 0, 0, 0, 0, 0, } }, },
+        { "Main 4:4:4 10",                  { { 1, 1, 0, 0, 0, 0, 0, 0, } }, },
+        { "Main 4:4:4 12",                  { { 1, 0, 0, 0, 0, 0, 0, 0, } }, },
+        { "Main Intra",                     { { 1, 1, 1, 1, 1, 0, 1, 0, } }, },
+        { "Main 10 Intra",                  { { 1, 1, 0, 1, 1, 0, 1, 0, } }, },
+        { "Main 12 Intra",                  { { 1, 0, 0, 1, 1, 0, 1, 0, } }, },
+        { "Main 4:2:2 10 Intra",            { { 1, 1, 0, 1, 0, 0, 1, 0, } }, },
+        { "Main 4:2:2 12 Intra",            { { 1, 0, 0, 1, 0, 0, 1, 0, } }, },
+        { "Main 4:4:4 Intra",               { { 1, 1, 1, 0, 0, 0, 1, 0, } }, },
+        { "Main 4:4:4 10 Intra",            { { 1, 1, 0, 0, 0, 0, 1, 0, } }, },
+        { "Main 4:4:4 12 Intra",            { { 1, 0, 0, 0, 0, 0, 1, 0, } }, },
+        { "Main 4:4:4 16 Intra",            { { 0, 0, 0, 0, 0, 0, 1, 0, } }, },
+        { "Main 4:4:4 Still Picture",       { { 1, 1, 1, 0, 0, 0, 1, 1, } }, },
+        { "Main 4:4:4 16 Still Picture",    { { 0, 0, 0, 0, 0, 0, 1, 1, } }, },
+    };
+
+    const union constraint c = {
+        .max_12bit = max_12bit,
+        .max_10bit = max_10bit,
+        .max_8bit = max_8bit,
+        .max_422chroma = max_422chroma,
+        .max_420chroma = max_420chroma,
+        .max_monochrome = max_monochrome,
+        .intra = intra,
+        .one_picture_only = one_picture_only,
+    };
+
+    if (!intra && !lower_bit_rate)
+        goto unknown;
+
+    for (int i = 0; i < sizeof(profile_name) / sizeof(*profile_name); i++)
+        if (profile_name[i].c.constraint == c.constraint)
+            return profile_name[i].name;
+
+unknown:
+    return "Range ext unknown profile";
+}
+
+static inline const char *h265_get_profile_txt(uint8_t i_profile)
+{
+    return i_profile == 0 ? "None" :
+           i_profile == 1 ? "Main" :
+           i_profile == 2 ? "Main 10" :
+           i_profile == 3 ? "Main Still Picture" :
+           i_profile == 4 ? "Range Extension" :
+           i_profile == 5 ? "High Throughput" :
+           i_profile == 6 ? "Multiview Main" :
+           i_profile == 7 ? "Scalable Main" :
+           i_profile == 8 ? "3D Main" :
+           i_profile == 9 ? "Screen-Extended" :
+           i_profile == 10 ? "Scalable Range Extension" :
+           i_profile == 11 ? "Screen-Extended High Throughput" : "Reserved";
 }
 
 static inline void h265hvcc_set_constraint_indicator(uint8_t *p, uint64_t val)

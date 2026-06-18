@@ -34,6 +34,7 @@
 #define __BITSTREAM_HAIVISION_SRT__
 
 #include <stdint.h>   /* uint8_t, uint16_t, etc... */
+#include <string.h>   /* memcpy */
 #include <stdbool.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -456,7 +457,7 @@ static inline void srt_set_handshake_ip(uint8_t *cif, const struct sockaddr *add
         case AF_INET6: {
             const struct sockaddr_in6 *in6 = (const struct sockaddr_in6 *)addr;
             for (int i = 0; i < 4; i++) {
-                memcpy(&ip, &in6->sin6_addr.s6_addr32[i], 4);
+                memcpy(&ip, &in6->sin6_addr.s6_addr[4*i], sizeof(ip));
                 cif[32+4*i] = (ip >> 24) & 0xff;
                 cif[33+4*i] = (ip >> 16) & 0xff;
                 cif[34+4*i] = (ip >>  8) & 0xff;
@@ -481,10 +482,11 @@ static inline void srt_get_handshake_ip(const uint8_t *cif, struct sockaddr *add
     } else {
         struct sockaddr_in6 *in6 = (struct sockaddr_in6 *)addr;
         in6->sin6_family = AF_INET6;
-        memcpy(&in6->sin6_addr.s6_addr32[0], &ip0, 4); /* why ? */
-        memcpy(&in6->sin6_addr.s6_addr32[1], &ip1, 4); /* why ? */
-        memcpy(&in6->sin6_addr.s6_addr32[2], &ip2, 4); /* why ? */
-        memcpy(&in6->sin6_addr.s6_addr32[3], &ip3, 4); /* why ? */
+        memcpy(&in6->sin6_addr.s6_addr[4*0], &ip0, 4); /* why ? */
+        memcpy(&in6->sin6_addr.s6_addr[4*1], &ip1, 4); /* why ? */
+        memcpy(&in6->sin6_addr.s6_addr[4*2], &ip2, 4); /* why ? */
+        memcpy(&in6->sin6_addr.s6_addr[4*3], &ip3, 4); /* why ? */
+
     }
 }
 
@@ -533,16 +535,16 @@ static inline bool srt_check_handshake(const uint8_t *cif, size_t n)
     uint16_t ext = srt_get_handshake_extension(cif);
 
     if (v == SRT_HANDSHAKE_VERSION && ext && ext != SRT_MAGIC_CODE) {
-        const uint8_t *ext = srt_get_handshake_extension_buf(cif);
+        const uint8_t *ext_buf = srt_get_handshake_extension_buf((uint8_t*)cif);
         while (n) {
             if (n < SRT_HANDSHAKE_CIF_EXTENSION_MIN_SIZE)
                 return false;
             n -= SRT_HANDSHAKE_CIF_EXTENSION_MIN_SIZE;
-            uint16_t extension_len = 4 * srt_get_handshake_extension_len(ext);
+            uint16_t extension_len = 4 * srt_get_handshake_extension_len(ext_buf);
             if (n < extension_len)
                 return false;
             n -= extension_len;
-            ext += SRT_HANDSHAKE_CIF_EXTENSION_MIN_SIZE + extension_len;
+            ext_buf += SRT_HANDSHAKE_CIF_EXTENSION_MIN_SIZE + extension_len;
         }
     }
 
@@ -631,8 +633,16 @@ static inline uint16_t srt_get_handshake_extension_sender_tsbpd_delay(const uint
 
 #define SRT_KMREQ_COMMON_SIZE   32
 
-#define SRT_KMREQ_CIPHER_NONE   0
-#define SRT_KMREQ_CIPHER_AES    2
+#define SRT_KMREQ_CIPHER_NONE       0
+#define SRT_KMREQ_CIPHER_AES_ECB    1
+#define SRT_KMREQ_CIPHER_AES_CTR    2
+#define SRT_KMREQ_CIPHER_AES_CBC    3
+#define SRT_KMREQ_CIPHER_AES_GCM    4
+
+#define SRT_KMREQ_CIPHER_AES SRT_KMREQ_CIPHER_AES_CTR
+
+#define SRT_KMREQ_AUTH_NONE 0
+#define SRT_KMREQ_AUTH_AES_GCM 1
 
 static inline uint8_t srt_km_get_kk(const uint8_t *km)
 {
@@ -654,6 +664,16 @@ static inline void srt_km_set_cipher(uint8_t *km, const uint8_t cipher)
     km[8] = cipher;
 }
 
+static inline uint8_t srt_km_get_auth(const uint8_t *km)
+{
+    return km[9];
+}
+
+static inline void srt_km_set_auth(uint8_t *km, const uint8_t auth)
+{
+    km[9] = auth;
+}
+
 static inline uint8_t srt_km_get_klen(const uint8_t *km)
 {
     return km[15];
@@ -664,7 +684,7 @@ static inline void srt_km_set_klen(uint8_t *km, const uint8_t klen)
     km[15] = klen;
 }
 
-static inline uint8_t *srt_km_get_salt(const uint8_t *km)
+static inline const uint8_t *srt_km_get_salt(const uint8_t *km)
 {
     return &km[16];
 }
@@ -707,10 +727,14 @@ static inline bool srt_check_km(const uint8_t *km, size_t n)
         return false;
 
     uint8_t cipher = srt_km_get_cipher(km);
-    if (cipher != SRT_KMREQ_CIPHER_NONE && cipher != SRT_KMREQ_CIPHER_AES)
+    if (cipher != SRT_KMREQ_CIPHER_NONE && cipher != SRT_KMREQ_CIPHER_AES_CTR && cipher != SRT_KMREQ_CIPHER_AES_GCM)
         return false;
 
-    if (km[9]) // Auth == 0
+    uint8_t auth = srt_km_get_auth(km);
+    if (auth != SRT_KMREQ_AUTH_NONE && auth != SRT_KMREQ_AUTH_AES_GCM)
+        return false;
+
+    if (cipher == SRT_KMREQ_CIPHER_AES_GCM && auth != SRT_KMREQ_AUTH_AES_GCM)
         return false;
 
     if (km[10] != 2) // SE

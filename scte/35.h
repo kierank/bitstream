@@ -212,7 +212,7 @@ static inline uint8_t scte35_splice_time_size(const uint8_t *p_splice_time)
 /*****************************************************************************
  * Splice Information Table - break_duration structure
  *****************************************************************************/
-#define SCTE35_BREAK_DURATION_HEADER_SIZE              5
+#define SCTE35_BREAK_DURATION_HEADER_SIZE              5u
 
 static inline void scte35_break_duration_init(uint8_t *p_break_duration)
 {
@@ -282,11 +282,11 @@ static inline bool scte35_null_validate(const uint8_t *p_scte35)
  * Splice Information Table - insert command
  *****************************************************************************/
 #define SCTE35_INSERT_COMMAND                       5
-#define SCTE35_INSERT_HEADER_SIZE                   5
-#define SCTE35_INSERT_HEADER2_SIZE                  1
+#define SCTE35_INSERT_HEADER_SIZE                   5u
+#define SCTE35_INSERT_HEADER2_SIZE                  1u
 #define SCTE35_INSERT_COMPONENT_COUNT_SIZE          1
 #define SCTE35_INSERT_COMPONENT_HEADER_SIZE         1
-#define SCTE35_INSERT_FOOTER_SIZE                   4
+#define SCTE35_INSERT_FOOTER_SIZE                   4u
 
 static inline void scte35_insert_init(uint8_t *p_scte35, uint16_t i_length)
 {
@@ -575,9 +575,9 @@ static inline bool scte35_insert_validate(const uint8_t *p_scte35)
         return false;
 
     if (scte35_insert_has_duration(p_scte35))
-        return i_length >= p_end + SCTE35_BREAK_DURATION_HEADER_SIZE +
-                                   SCTE35_INSERT_FOOTER_SIZE - p_command;
-    return i_length >= p_end + SCTE35_INSERT_FOOTER_SIZE - p_command;
+        return i_length >= (size_t)(p_end + SCTE35_BREAK_DURATION_HEADER_SIZE +
+                                   SCTE35_INSERT_FOOTER_SIZE - p_command);
+    return i_length >= (size_t)(p_end + SCTE35_INSERT_FOOTER_SIZE - p_command);
 }
 
 /*****************************************************************************
@@ -674,6 +674,7 @@ static inline bool scte35_private_validate(const uint8_t *p_scte35)
 #define SCTE35_SPLICE_DESC_TAG_AVAIL    0x00
 #define SCTE35_SPLICE_DESC_TAG_DTMF     0x01
 #define SCTE35_SPLICE_DESC_TAG_SEG      0x02
+#define SCTE35_SPLICE_DESC_TAG_TIME     0x03
 
 #define scte35_splice_desc_get_tag      desc_get_tag
 #define scte35_splice_desc_set_tag      desc_set_tag
@@ -693,6 +694,38 @@ static inline void scte35_splice_desc_set_identifier(uint8_t *p_desc,
     p_desc[3] = (identifier >> 16) & 0xff;
     p_desc[4] = (identifier >> 8) & 0xff;
     p_desc[5] = identifier & 0xff;
+}
+
+/*****************************************************************************
+ * Splice Information Table - avail descriptor
+ *****************************************************************************/
+#define SCTE35_AVAIL_DESC_HEADER_SIZE       4
+
+static inline void scte35_avail_desc_init(uint8_t *p_desc)
+{
+    scte35_splice_desc_set_tag(p_desc, SCTE35_SPLICE_DESC_TAG_AVAIL);
+    scte35_splice_desc_set_length(p_desc,
+                                  SCTE35_SPLICE_DESC_HEADER_SIZE -
+                                  DESC_HEADER_SIZE +
+                                  SCTE35_AVAIL_DESC_HEADER_SIZE);
+    scte35_splice_desc_set_identifier(p_desc, SCTE35_SPLICE_DESC_IDENTIFIER);
+    p_desc[10] = 0x7f;
+}
+
+static inline uint32_t
+scte35_avail_desc_get_provider_avail_id(const uint8_t *p_desc)
+{
+    return ((uint32_t)p_desc[6] << 24) | (p_desc[7] << 16) |
+        (p_desc[8] << 8) | p_desc[9];
+}
+
+static inline void scte35_avail_desc_set_provider_avail_id(uint8_t *p_desc,
+                                                           uint32_t id)
+{
+    p_desc[6] = (id >> 24) & 0xff;
+    p_desc[7] = (id >> 16) & 0xff;
+    p_desc[8] = (id >> 8) & 0xff;
+    p_desc[9] = id & 0xff;
 }
 
 /*****************************************************************************
@@ -1371,6 +1404,68 @@ static inline void scte35_seg_desc_set_sub_expected(uint8_t *p_desc,
     if (p + 4 <
         p_desc + scte35_splice_desc_get_length(p_desc) + DESC_HEADER_SIZE)
         p[4] = value;
+}
+
+/*****************************************************************************
+ * Splice Information Table - time descriptor
+ *****************************************************************************/
+#define SCTE35_TIME_DESC_HEADER_SIZE        16
+
+static inline uint64_t scte35_time_desc_get_tai_sec(const uint8_t *p_desc)
+{
+    return ((uint64_t)p_desc[6] << 40) | ((uint64_t)p_desc[7] << 32) |
+        (p_desc[8] << 24) | (p_desc[9] << 16) | (p_desc[10] << 8) | p_desc[11];
+}
+
+static inline void scte35_time_desc_set_tai_sec(uint8_t *p_desc,
+                                                uint64_t tai_sec)
+{
+    p_desc[6] = (tai_sec >> 40) & 0xff;
+    p_desc[7] = (tai_sec >> 32) & 0xff;
+    p_desc[8] = (tai_sec >> 24) & 0xff;
+    p_desc[9] = (tai_sec >> 16) & 0xff;
+    p_desc[10] = (tai_sec >> 8) & 0xff;
+    p_desc[11] = tai_sec & 0xff;
+}
+
+static inline uint32_t scte35_time_desc_get_tai_ns(const uint8_t *p_desc)
+{
+    return ((uint32_t)p_desc[12] << 24) | (p_desc[13] << 16) |
+        (p_desc[14] << 8) | p_desc[15];
+}
+
+static inline void scte35_time_desc_set_tai_ns(uint8_t *p_desc,
+                                               uint32_t tai_ns)
+{
+    p_desc[12] = (tai_ns >> 24) & 0xff;
+    p_desc[13] = (tai_ns >> 16) & 0xff;
+    p_desc[14] = (tai_ns >> 8) & 0xff;
+    p_desc[15] = tai_ns & 0xff;
+}
+
+static inline uint16_t scte35_time_desc_get_utc_off(const uint8_t *p_desc)
+{
+    return ((uint16_t)p_desc[16] << 8) | p_desc[17];
+}
+
+static inline void scte35_time_desc_set_utc_off(uint8_t *p_desc,
+                                               uint16_t utc_off)
+{
+    p_desc[16] = (utc_off >> 8) & 0xff;
+    p_desc[17] = utc_off & 0xff;
+}
+
+static inline void scte35_time_desc_init(uint8_t *p_desc)
+{
+    scte35_splice_desc_set_tag(p_desc, SCTE35_SPLICE_DESC_TAG_TIME);
+    scte35_splice_desc_set_length(p_desc,
+                                  SCTE35_SPLICE_DESC_HEADER_SIZE -
+                                  DESC_HEADER_SIZE +
+                                  SCTE35_TIME_DESC_HEADER_SIZE);
+    scte35_splice_desc_set_identifier(p_desc, SCTE35_SPLICE_DESC_IDENTIFIER);
+    scte35_time_desc_set_tai_sec(p_desc, 0);
+    scte35_time_desc_set_tai_ns(p_desc, 0);
+    scte35_time_desc_set_utc_off(p_desc, 0);
 }
 
 /*****************************************************************************
